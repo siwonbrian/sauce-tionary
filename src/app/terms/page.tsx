@@ -48,7 +48,7 @@ export default function TermsPage() {
   return (
     <div className="min-h-screen pb-16">
       <header className="sticky top-0 z-10 border-b border-gray-100 bg-white px-4 py-3">
-        <Link href="/" className="flex items-center gap-1 text-sm text-gray-600">
+        <Link href="/" className="inline-flex items-center gap-1 text-sm text-gray-600">
           <IconArrowLeft size={16} />
           {t.backToHome}
         </Link>

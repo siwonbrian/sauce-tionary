@@ -18,13 +18,16 @@ export default function BottomNav() {
       setShowLoginGate(true);
       return;
     }
-    router.push("/mypage?tab=saved");
+    router.push("/mypage/saved");
   };
 
+  // 저장됨/설정을 쿼리(?tab=)가 아니라 서로 다른 경로(/mypage/saved, /mypage/settings)로 분리했습니다.
+  // 예전에는 둘 다 "/mypage"로 시작해서 pathname만으로 구분이 안 돼, 저장됨·설정 탭이 동시에
+  // 활성(주황색)으로 표시되는 문제가 있었습니다.
   const tabs = [
     { key: "home", href: "/", label: t.navRecipes, icon: IconChefHat, onClick: undefined },
-    { key: "saved", href: "/mypage?tab=saved", label: t.navSaved, icon: IconBookmark, onClick: handleSavedClick },
-    { key: "settings", href: "/mypage?tab=settings", label: t.navSettings, icon: IconSettings, onClick: undefined },
+    { key: "saved", href: "/mypage/saved", label: t.navSaved, icon: IconBookmark, onClick: handleSavedClick },
+    { key: "settings", href: "/mypage/settings", label: t.navSettings, icon: IconSettings, onClick: undefined },
   ];
 
   return (
@@ -43,7 +46,7 @@ export default function BottomNav() {
       <nav className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white">
         <div className="mx-auto flex max-w-md">
           {tabs.map(({ key, href, label, icon: Icon, onClick }) => {
-            const active = pathname === href.split("?")[0];
+            const active = pathname === href;
             const className = `flex flex-1 flex-col items-center gap-0.5 py-2 text-xs ${
               active ? "text-brand-600" : "text-gray-400"
             }`;

@@ -8,6 +8,10 @@
 
 export type FlavorTag = "매콤" | "고소" | "짭짤";
 export type CountryTag = "한식" | "중식" | "양식" | "일식" | "멕시칸";
+// 국가별 분류와는 별개의 축입니다. 브랜드·상황 기준으로 묶고 싶은 소스(하이디라오
+// 소스바 조합, 훠궈 등 핫팟류 찍먹 소스 전반)를 위한 태그로, 국가 분류를 계속 5개로
+// 고정해두고 싶어서 별도로 분리했습니다. 필요해지면 이 목록에만 추가하면 됩니다.
+export type ThemeTag = "하이디라오";
 
 export type IngredientUnit = "큰술" | "작은술" | "ml" | "g";
 
@@ -26,6 +30,7 @@ export interface MockRecipe {
   nameEn: string;
   flavor: FlavorTag;
   country: CountryTag;
+  theme?: ThemeTag; // 국가 분류와 별개인 브랜드·상황 태그 (예: 하이디라오 소스바류)
   celebrityName?: string; // 예: "건희" -> 제목에 "건희가 소개한 ~"로 표시 + #건희 해시태그(검색용) 병행
   celebrityNameEn?: string; // 영어 화면용 로마자 표기 (예: "Geonhui")
   spiceLevel: number; // 0(순함) ~ 3(제일 매움). 벤치마킹(saucepick.com) 후 추가
@@ -50,6 +55,7 @@ export const mockRecipes: MockRecipe[] = [
     nameEn: "Mala Hotpot Sauce",
     flavor: "매콤",
     country: "중식",
+    theme: "하이디라오",
     spiceLevel: 1,
     celebrityName: "건희",
     celebrityNameEn: "Geonhui",
