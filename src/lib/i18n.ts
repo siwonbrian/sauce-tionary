@@ -82,6 +82,21 @@ export const UI_STRINGS = {
     submitAddIngredient: "재료 추가",
     submitInstructionsLabel: "만드는 법",
     submitButton: "제보 등록",
+    myPageTitle: "마이페이지",
+    myPageLoginPrompt: "로그인하고 저장한 레시피와 설정을 확인해보세요.",
+    settingsLanguage: "언어",
+    settingsAbout: "소개",
+    settingsTerms: "이용약관",
+    settingsPrivacy: "개인정보처리방침",
+    settingsContact: "문의하기",
+    settingsLogout: "로그아웃",
+    settingsVersion: "버전",
+    aboutTitle: "소스백과 소개",
+    aboutBody1:
+      "소스백과는 SNS·유튜브·방송에서 화제가 된 소스와 양념 레시피를 한 곳에 모아, 원본 출처와 함께 검색하고 저장할 수 있게 만든 서비스예요.",
+    aboutBody2:
+      "레시피는 사용자 제보로 등록돼요. 제보 시 원본 게시물 링크를 반드시 남기고, 운영자가 확인하기 전까지는 \"검증 필요\" 배지가 붙어요. 잘못된 정보나 저작권 문제를 발견하면 언제든 문의해주세요.",
+    aboutContactCta: "문의하기 →",
   },
   en: {
     siteName: "Sauce-tionary",
@@ -146,5 +161,20 @@ export const UI_STRINGS = {
     submitAddIngredient: "Add ingredient",
     submitInstructionsLabel: "Instructions",
     submitButton: "Submit",
+    myPageTitle: "My Page",
+    myPageLoginPrompt: "Log in to see your saved recipes and settings.",
+    settingsLanguage: "Language",
+    settingsAbout: "About",
+    settingsTerms: "Terms of Service",
+    settingsPrivacy: "Privacy Policy",
+    settingsContact: "Contact",
+    settingsLogout: "Log out",
+    settingsVersion: "Version",
+    aboutTitle: "About Sauce-tionary",
+    aboutBody1:
+      "Sauce-tionary collects sauce and seasoning recipes that go viral on social media, YouTube, and TV, so you can search and save them in one place, along with their original source.",
+    aboutBody2:
+      "Recipes are added through user submissions. Every submission must include a link to the original post, and carries a \"Needs verification\" badge until a moderator reviews it. If you spot incorrect information or a copyright issue, please reach out any time.",
+    aboutContactCta: "Contact us →",
   },
 } satisfies Record<Language, Record<string, string>>;
