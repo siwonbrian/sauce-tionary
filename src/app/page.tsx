@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   IconSearch,
@@ -44,7 +44,20 @@ export default function HomePage() {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  // 시트가 열리자마자 바로 true를 주면 브라우저가 트랜지션을 못 그리고 건너뛰어서,
+  // 마운트된 다음 프레임에 true로 바꿔 SEED Bottom Sheet의 enter 모션(아래에서 위로
+  // 슬라이드 + 배경 페이드인)이 실제로 재생되게 합니다.
+  const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const { isFavorite, toggleFavorite } = useFavoriteCategories();
+
+  useEffect(() => {
+    if (!filterSheetOpen) {
+      setFilterSheetVisible(false);
+      return;
+    }
+    const raf = requestAnimationFrame(() => setFilterSheetVisible(true));
+    return () => cancelAnimationFrame(raf);
+  }, [filterSheetOpen]);
 
   const toggleSave = (id: string) => {
     setRecipes((prev) =>
@@ -368,20 +381,37 @@ export default function HomePage() {
       </main>
 
       {/* 요리 종류 · 테마 전체 목록을 고르는 바텀시트. 로그인 여부와 상관없이
-          별표(즐겨찾기)를 누르면 바로 위 기본 화면 칩에 추가됩니다. */}
+          별표(즐겨찾기)를 누르면 바로 위 기본 화면 칩에 추가됩니다.
+          SEED 컴포넌트 문서(seed-design.io/components/bottom-sheet) 스펙을 따름:
+          backdrop = $color.bg.overlay, content topCornerRadius = $radius.r6(24px),
+          enterDuration = $duration.d6(300ms) + $timing-function.enter-expressive,
+          핸들 36x4px 회색, 닫기 버튼 44px 터치영역/28px 원형. */}
       {filterSheetOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40"
+          className={`fixed inset-0 z-50 flex items-end justify-center bg-[#00000074] transition-opacity duration-300 ease-[cubic-bezier(0,0,0.15,1)] ${
+            filterSheetVisible ? "opacity-100" : "opacity-0"
+          }`}
           onClick={() => setFilterSheetOpen(false)}
         >
           <div
-            className="w-full max-w-md rounded-t-2xl bg-white p-5 shadow-s3"
+            className={`w-full max-w-md rounded-t-3xl bg-white px-5 pb-5 pt-1.5 shadow-s3 transition-transform duration-300 ease-[cubic-bezier(0.03,0.4,0.1,1)] ${
+              filterSheetVisible ? "translate-y-0" : "translate-y-full"
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-gray-900">{t.filterSheetTitle}</h2>
-              <button onClick={() => setFilterSheetOpen(false)} aria-label={t.close}>
-                <IconX size={18} className="text-gray-400" />
+            <div className="mx-auto h-1 w-9 rounded-full bg-gray-400" />
+            <div className="mt-4 flex items-center justify-between">
+              <h2 className="text-[1.375rem] font-bold leading-[1.875rem] text-gray-900">
+                {t.filterSheetTitle}
+              </h2>
+              <button
+                onClick={() => setFilterSheetOpen(false)}
+                aria-label={t.close}
+                className="flex h-11 w-11 items-center justify-center"
+              >
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200">
+                  <IconX size={14} className="text-gray-900" />
+                </span>
               </button>
             </div>
             <p className="mt-1 text-xs text-gray-400">{t.filterFavoriteHint}</p>

@@ -71,7 +71,7 @@ export default function BottomNav() {
       </nav>
 
       {showLoginGate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#00000074]">
           <div className="relative mx-6 w-full max-w-xs rounded-2xl bg-white p-5 text-center shadow-s3">
             <button
               onClick={() => setShowLoginGate(false)}
