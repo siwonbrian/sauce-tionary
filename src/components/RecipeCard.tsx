@@ -27,7 +27,9 @@ export default function RecipeCard({
     language === "en" ? recipe.celebrityNameEn : recipe.celebrityName;
 
   return (
-    <div className="relative flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 hover:shadow-sm transition-shadow">
+    // 카드 호버 살짝 뜨는 효과. SEED 디자인 시스템 Motion 토큰 중 마이크로 인터랙션용
+    // duration($duration.d3, 150ms) + easing($timing-function.enter, cubic-bezier(0,0,0.15,1)) 적용.
+    <div className="relative flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 transition-all duration-150 ease-[cubic-bezier(0,0,0.15,1)] hover:-translate-y-0.5 hover:shadow-md">
       <button
         onClick={() => onToggleSave(recipe.id)}
         aria-label="저장"

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { IconSearch, IconChevronDown } from "@tabler/icons-react";
 import RecipeCard from "@/components/RecipeCard";
+import Reveal from "@/components/Reveal";
 import {
   mockRecipes,
   type CountryTag,
@@ -246,13 +247,14 @@ export default function HomePage() {
                   #{FLAVOR_LABELS[flavorGroup as FlavorTag][language]}
                 </h2>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {items.map((r) => (
-                    <RecipeCard
-                      key={r.id}
-                      recipe={r}
-                      onToggleSave={toggleSave}
-                      onToggleLike={toggleLike}
-                    />
+                  {items.map((r, i) => (
+                    <Reveal key={r.id} delay={i * 40}>
+                      <RecipeCard
+                        recipe={r}
+                        onToggleSave={toggleSave}
+                        onToggleLike={toggleLike}
+                      />
+                    </Reveal>
                   ))}
                 </div>
               </div>
@@ -264,13 +266,14 @@ export default function HomePage() {
         {sort !== "저장됨" && (
           <>
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {pagedList.map((r) => (
-                <RecipeCard
-                  key={r.id}
-                  recipe={r}
-                  onToggleSave={toggleSave}
-                  onToggleLike={toggleLike}
-                />
+              {pagedList.map((r, i) => (
+                <Reveal key={r.id} delay={i * 40}>
+                  <RecipeCard
+                    recipe={r}
+                    onToggleSave={toggleSave}
+                    onToggleLike={toggleLike}
+                  />
+                </Reveal>
               ))}
             </div>
 
