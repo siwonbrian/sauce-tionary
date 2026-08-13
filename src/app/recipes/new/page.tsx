@@ -101,9 +101,9 @@ export default function RecipeSubmitPage() {
         <p className="mt-1 text-sm text-gray-500">{t.submitSubtitle}</p>
 
         {submitted ? (
-          <div className="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-4 text-center">
-            <p className="text-sm font-semibold text-amber-700">{t.submitSuccessTitle}</p>
-            <p className="mt-1 text-xs text-amber-600">{t.submitSuccessBody}</p>
+          <div className="mt-8 rounded-xl border border-brand-200 bg-brand-100 p-4 text-center">
+            <p className="text-sm font-semibold text-brand-700">{t.submitSuccessTitle}</p>
+            <p className="mt-1 text-xs text-brand-600">{t.submitSuccessBody}</p>
             <Link href="/" className="mt-3 inline-block text-xs font-medium text-gray-700 underline">
               {t.backToHome}
             </Link>
@@ -143,14 +143,14 @@ export default function RecipeSubmitPage() {
                 onChange={(e) => setSourceUrl(e.target.value)}
                 placeholder={t.submitSourcePlaceholder}
                 required
-                className="mt-1.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-amber-400"
+                className="mt-1.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-brand-400"
               />
             </div>
 
             <button
               onClick={handleAnalyze}
               disabled={!canAnalyze}
-              className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg bg-amber-500 py-2.5 text-sm font-semibold text-white disabled:opacity-40"
+              className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg bg-brand-500 py-2.5 text-sm font-semibold text-white disabled:opacity-40"
             >
               <IconSparkles size={16} />
               {analyzing ? t.submitAnalyzing : t.submitAnalyzeCta}
@@ -167,7 +167,7 @@ export default function RecipeSubmitPage() {
                 <input
                   value={draft.name}
                   onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-                  className="mt-1.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-amber-400"
+                  className="mt-1.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-brand-400"
                 />
 
                 <label className="mt-4 block text-sm font-semibold text-gray-700">{t.submitIngredientsLabel}</label>
@@ -178,18 +178,18 @@ export default function RecipeSubmitPage() {
                         value={ing.name}
                         onChange={(e) => updateIngredient(i, { name: e.target.value })}
                         placeholder={t.submitIngredientNamePlaceholder}
-                        className="w-1/3 rounded-lg border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-amber-400"
+                        className="w-1/3 rounded-lg border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-brand-400"
                       />
                       <input
                         value={ing.amount}
                         onChange={(e) => updateIngredient(i, { amount: e.target.value })}
                         placeholder={t.submitIngredientAmountPlaceholder}
-                        className="w-16 rounded-lg border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-amber-400"
+                        className="w-16 rounded-lg border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-brand-400"
                       />
                       <select
                         value={ing.unit}
                         onChange={(e) => updateIngredient(i, { unit: e.target.value as IngredientUnit })}
-                        className="rounded-lg border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-amber-400"
+                        className="rounded-lg border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-brand-400"
                       >
                         {UNITS.map((u) => (
                           <option key={u} value={u}>{u}</option>
@@ -207,7 +207,7 @@ export default function RecipeSubmitPage() {
                 </div>
                 <button
                   onClick={addIngredient}
-                  className="mt-2 flex items-center gap-1 text-xs text-amber-600"
+                  className="mt-2 flex items-center gap-1 text-xs text-brand-600"
                 >
                   <IconPlus size={14} />
                   {t.submitAddIngredient}
@@ -218,7 +218,7 @@ export default function RecipeSubmitPage() {
                   value={draft.instructions}
                   onChange={(e) => setDraft({ ...draft, instructions: e.target.value })}
                   rows={3}
-                  className="mt-1.5 w-full rounded-lg border border-gray-200 p-2 text-sm outline-none focus:border-amber-400"
+                  className="mt-1.5 w-full rounded-lg border border-gray-200 p-2 text-sm outline-none focus:border-brand-400"
                 />
 
                 <button

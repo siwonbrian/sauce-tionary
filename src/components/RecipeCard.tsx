@@ -29,14 +29,14 @@ export default function RecipeCard({
   return (
     // 카드 호버 살짝 뜨는 효과. SEED 디자인 시스템 Motion 토큰 중 마이크로 인터랙션용
     // duration($duration.d3, 150ms) + easing($timing-function.enter, cubic-bezier(0,0,0.15,1)) 적용.
-    <div className="relative flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 transition-all duration-150 ease-[cubic-bezier(0,0,0.15,1)] hover:-translate-y-0.5 hover:shadow-md">
+    <div className="relative flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 transition-all duration-150 ease-[cubic-bezier(0,0,0.15,1)] hover:-translate-y-0.5 hover:shadow-s2">
       <button
         onClick={() => onToggleSave(recipe.id)}
         aria-label="저장"
-        className="absolute top-3 right-3 z-10 rounded-full bg-white/90 p-1 text-gray-400 shadow-sm hover:text-amber-500"
+        className="absolute top-3 right-3 z-10 rounded-full bg-white/90 p-1 text-gray-400 shadow-s1 hover:text-brand-500"
       >
         {recipe.saved ? (
-          <IconBookmarkFilled size={20} className="text-amber-500" />
+          <IconBookmarkFilled size={20} className="text-brand-500" />
         ) : (
           <IconBookmark size={20} />
         )}
@@ -62,13 +62,13 @@ export default function RecipeCard({
           {recipe.celebrityName && celebrityLabel ? (
             language === "en" ? (
               <>
-                <span className="text-amber-600">{celebrityLabel}</span>
+                <span className="text-brand-600">{celebrityLabel}</span>
                 <span className="text-gray-900">&rsquo;s </span>
                 {recipe.nameEn}
               </>
             ) : (
               <>
-                <span className="text-amber-600">{recipe.celebrityName}</span>
+                <span className="text-brand-600">{recipe.celebrityName}</span>
                 <span className="text-gray-500">
                   {subjectParticle(recipe.celebrityName)} 소개한{" "}
                 </span>
@@ -93,7 +93,7 @@ export default function RecipeCard({
             <span className="text-xs">{"🌶️".repeat(recipe.spiceLevel)}</span>
           )}
           {recipe.celebrityName && (
-            <span className="text-xs rounded-full bg-amber-50 px-2 py-0.5 text-amber-700">
+            <span className="text-xs rounded-full bg-brand-100 px-2 py-0.5 text-brand-700">
               #{celebrityLabel ?? recipe.celebrityName}
             </span>
           )}

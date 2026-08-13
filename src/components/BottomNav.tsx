@@ -34,7 +34,7 @@ export default function BottomNav() {
       <button
         onClick={toggleLanguage}
         aria-label="language toggle"
-        className="fixed bottom-16 right-3 z-40 flex items-center gap-1 rounded-full border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 shadow-sm"
+        className="fixed bottom-16 right-3 z-40 flex items-center gap-1 rounded-full border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 shadow-s1"
       >
         <IconLanguage size={14} />
         {language === "ko" ? "EN" : "한국어"}
@@ -45,7 +45,7 @@ export default function BottomNav() {
           {tabs.map(({ key, href, label, icon: Icon, onClick }) => {
             const active = pathname === href.split("?")[0];
             const className = `flex flex-1 flex-col items-center gap-0.5 py-2 text-xs ${
-              active ? "text-amber-600" : "text-gray-400"
+              active ? "text-brand-600" : "text-gray-400"
             }`;
 
             if (onClick) {
@@ -69,7 +69,7 @@ export default function BottomNav() {
 
       {showLoginGate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="relative mx-6 w-full max-w-xs rounded-2xl bg-white p-5 text-center shadow-lg">
+          <div className="relative mx-6 w-full max-w-xs rounded-2xl bg-white p-5 text-center shadow-s3">
             <button
               onClick={() => setShowLoginGate(false)}
               aria-label="닫기"

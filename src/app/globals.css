@@ -10,4 +10,8 @@
 body {
   color: var(--foreground);
   background: var(--background);
+  /* SEED 디자인 시스템(seed-design.io/foundations/typography)의 시스템 폰트 스택 */
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }

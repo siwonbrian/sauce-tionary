@@ -39,7 +39,7 @@ export default function RecipeDetailPage() {
     return (
       <main className="p-6">
         <h1 className="text-lg font-bold">{t.recipeNotFound}</h1>
-        <Link href="/" className="mt-2 inline-block text-sm text-amber-600">
+        <Link href="/" className="mt-2 inline-block text-sm text-brand-600">
           {t.backToHome}
         </Link>
       </main>
@@ -89,13 +89,13 @@ export default function RecipeDetailPage() {
             {recipe.celebrityName && celebrityLabel ? (
               language === "en" ? (
                 <>
-                  <span className="text-amber-600">{celebrityLabel}</span>
+                  <span className="text-brand-600">{celebrityLabel}</span>
                   <span className="text-gray-900">&rsquo;s </span>
                   {recipe.nameEn}
                 </>
               ) : (
                 <>
-                  <span className="text-amber-600">{recipe.celebrityName}</span>
+                  <span className="text-brand-600">{recipe.celebrityName}</span>
                   <span className="text-gray-500">
                     {subjectParticle(recipe.celebrityName)} 소개한{" "}
                   </span>
@@ -111,7 +111,7 @@ export default function RecipeDetailPage() {
           <button
             onClick={() => setSaved((v) => !v)}
             aria-label="저장"
-            className={saved ? "text-amber-500" : "text-gray-400"}
+            className={saved ? "text-brand-500" : "text-gray-400"}
           >
             {saved ? <IconBookmarkFilled size={22} /> : <IconBookmark size={22} />}
           </button>
@@ -149,7 +149,7 @@ export default function RecipeDetailPage() {
           </button>
         </div>
         {shareMessage && (
-          <p className="mt-1 break-all text-xs text-amber-600">{shareMessage}</p>
+          <p className="mt-1 break-all text-xs text-brand-600">{shareMessage}</p>
         )}
 
         {/* 계량 단위 변환. 기본값(그램)에서 체크하면 컵·스푼 근사치로 바뀌는 단일 체크박스 방식
@@ -161,7 +161,7 @@ export default function RecipeDetailPage() {
               type="checkbox"
               checked={unitSystem === "us"}
               onChange={(e) => setUnitSystem(e.target.checked ? "us" : "kr")}
-              className="h-3.5 w-3.5 rounded border-gray-300 accent-amber-500"
+              className="h-3.5 w-3.5 rounded border-gray-300 accent-brand-500"
             />
             {t.unitToggleLabel}
           </label>
@@ -214,7 +214,7 @@ export default function RecipeDetailPage() {
             placeholder={t.myNotePlaceholder}
             rows={3}
             disabled={!loggedIn}
-            className="mt-2 w-full rounded-lg border border-gray-200 p-2 text-sm outline-none focus:border-amber-400 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400"
+            className="mt-2 w-full rounded-lg border border-gray-200 p-2 text-sm outline-none focus:border-brand-400 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400"
           />
           {loggedIn ? (
             <>
@@ -224,7 +224,7 @@ export default function RecipeDetailPage() {
               >
                 {t.saveNote}
               </button>
-              {noteSaved && <span className="ml-2 text-xs text-amber-600">{t.saved}</span>}
+              {noteSaved && <span className="ml-2 text-xs text-brand-600">{t.saved}</span>}
             </>
           ) : (
             <Link

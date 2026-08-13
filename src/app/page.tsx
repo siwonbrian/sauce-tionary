@@ -174,7 +174,7 @@ export default function HomePage() {
               }}
               className={`rounded-full px-3 py-1 text-sm ${
                 flavor === f
-                  ? "bg-amber-500 text-white"
+                  ? "bg-brand-500 text-white"
                   : "bg-gray-100 text-gray-600"
               }`}
             >
@@ -193,7 +193,7 @@ export default function HomePage() {
             <IconChevronDown size={14} />
           </button>
           {sortOpen && (
-            <div className="absolute right-0 top-9 z-10 w-28 rounded-lg border border-gray-200 bg-white py-1 shadow-sm">
+            <div className="absolute right-0 top-9 z-10 w-28 rounded-lg border border-gray-200 bg-white py-1 shadow-s2">
               {SORTS.map((s) => (
                 <button
                   key={s}
@@ -203,7 +203,7 @@ export default function HomePage() {
                     setPage(1);
                   }}
                   className={`block w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 ${
-                    sort === s ? "font-semibold text-amber-600" : "text-gray-600"
+                    sort === s ? "font-semibold text-brand-600" : "text-gray-600"
                   }`}
                 >
                   {s === "최신순" ? t.sortNewest : s === "인기순" ? t.sortPopular : t.sortSaved}
