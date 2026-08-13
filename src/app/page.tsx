@@ -5,10 +5,8 @@ import Link from "next/link";
 import {
   IconSearch,
   IconChevronDown,
-  IconAdjustments,
   IconStar,
   IconStarFilled,
-  IconX,
 } from "@tabler/icons-react";
 import RecipeCard from "@/components/RecipeCard";
 import Reveal from "@/components/Reveal";
@@ -32,6 +30,60 @@ type SortOption = (typeof SORTS)[number];
 
 const PAGE_SIZE = 6;
 
+// "전체" 칩을 누르면 국가·테마 칩들이 그 자리에서 튀어나오듯 펼쳐지는 애니메이션.
+// visible이 false→true로 바뀔 때 scale/opacity가 전환되고, delay를 칩마다 다르게 줘서
+// 하나씩 순서대로 튀어나오는 것처럼 보이게 합니다(SEED 마이크로 모션: duration 200ms,
+// $timing-function.enter-expressive 커브).
+function PopChip({
+  label,
+  selected,
+  favorite,
+  visible,
+  delay,
+  onSelect,
+  onToggleFavorite,
+}: {
+  label: string;
+  selected: boolean;
+  favorite: boolean;
+  visible: boolean;
+  delay: number;
+  onSelect: () => void;
+  onToggleFavorite: () => void;
+}) {
+  return (
+    <span
+      style={{ transitionDelay: visible ? `${delay}ms` : "0ms" }}
+      className={`relative inline-flex origin-left transition-all duration-200 ease-[cubic-bezier(0.03,0.4,0.1,1)] ${
+        visible ? "scale-100 opacity-100" : "scale-50 opacity-0"
+      }`}
+    >
+      <button
+        onClick={onSelect}
+        className={`rounded-full px-3 py-1 text-sm ${
+          selected ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600"
+        }`}
+      >
+        {label}
+      </button>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleFavorite();
+        }}
+        aria-label="favorite"
+        className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-white shadow-s1"
+      >
+        {favorite ? (
+          <IconStarFilled size={10} className="text-brand-500" />
+        ) : (
+          <IconStar size={10} className="text-gray-300" />
+        )}
+      </button>
+    </span>
+  );
+}
+
 export default function HomePage() {
   const { language, t } = useLanguage();
   const [recipes, setRecipes] = useState(mockRecipes);
@@ -43,21 +95,20 @@ export default function HomePage() {
   const [savedDesc, setSavedDesc] = useState(true); // 저장됨 그룹 내 높은순/낮은순
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
-  // 시트가 열리자마자 바로 true를 주면 브라우저가 트랜지션을 못 그리고 건너뛰어서,
-  // 마운트된 다음 프레임에 true로 바꿔 SEED Bottom Sheet의 enter 모션(아래에서 위로
-  // 슬라이드 + 배경 페이드인)이 실제로 재생되게 합니다.
-  const [filterSheetVisible, setFilterSheetVisible] = useState(false);
+  const [categoriesExpanded, setCategoriesExpanded] = useState(false);
+  // "전체" 칩을 눌러 펼쳐지자마자 바로 보이는 상태로 두면 트랜지션 없이 뿅 나타나므로,
+  // 펼쳐진 다음 프레임에 true로 바꿔서 튀어나오는 애니메이션이 실제로 재생되게 합니다.
+  const [chipsVisible, setChipsVisible] = useState(false);
   const { isFavorite, toggleFavorite } = useFavoriteCategories();
 
   useEffect(() => {
-    if (!filterSheetOpen) {
-      setFilterSheetVisible(false);
+    if (!categoriesExpanded) {
+      setChipsVisible(false);
       return;
     }
-    const raf = requestAnimationFrame(() => setFilterSheetVisible(true));
+    const raf = requestAnimationFrame(() => setChipsVisible(true));
     return () => cancelAnimationFrame(raf);
-  }, [filterSheetOpen]);
+  }, [categoriesExpanded]);
 
   const toggleSave = (id: string) => {
     setRecipes((prev) =>
@@ -86,6 +137,7 @@ export default function HomePage() {
     setFlavor("전체");
     setSort("최신순");
     setPage(1);
+    setCategoriesExpanded(false);
   };
 
   // 요리 종류 · 테마 · 맛 · 검색어 필터를 실제로 적용
@@ -166,15 +218,19 @@ export default function HomePage() {
       </header>
 
       <main className="mx-auto max-w-md px-4 py-4">
-        {/* 요리 종류 · 테마 분류. 다 펼쳐두면 브랜드 태그(하이디라오 등)가 늘어날 때마다
-            계속 길어지니, 기본은 "전체" + 즐겨찾기한 것만 보여주고 나머지는 필터
-            버튼을 눌러 바텀시트에서 고르는 방식으로 접어둡니다. */}
+        {/* 요리 종류 · 테마 분류. "전체"를 누르면 안에서 밖으로 튀어나오듯 전체 목록이
+            펼쳐지고, 별표를 누르면 즐겨찾기로 고정돼서 접었을 때도 바로 보입니다. */}
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => {
-              setCountry("전체");
-              setTheme("전체");
-              setPage(1);
+              if (categoriesExpanded) {
+                setCountry("전체");
+                setTheme("전체");
+                setPage(1);
+                setCategoriesExpanded(false);
+              } else {
+                setCategoriesExpanded(true);
+              }
             }}
             className={`rounded-full px-3 py-1 text-sm ${
               country === "전체" && theme === "전체"
@@ -185,50 +241,85 @@ export default function HomePage() {
             {t.all}
           </button>
 
-          {ALL_COUNTRIES.filter((c) => isFavorite(`country:${c}`)).map((c) => (
-            <button
-              key={c}
-              onClick={() => {
-                setCountry(c);
-                setTheme("전체");
-                setPage(1);
-              }}
-              className={`rounded-full px-3 py-1 text-sm ${
-                country === c
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100 text-gray-600"
-              }`}
-            >
-              {COUNTRY_LABELS[c][language]}
-            </button>
-          ))}
+          {!categoriesExpanded &&
+            ALL_COUNTRIES.filter((c) => isFavorite(`country:${c}`)).map((c) => (
+              <button
+                key={c}
+                onClick={() => {
+                  setCountry(c);
+                  setTheme("전체");
+                  setPage(1);
+                }}
+                className={`rounded-full px-3 py-1 text-sm ${
+                  country === c
+                    ? "bg-gray-900 text-white"
+                    : "bg-gray-100 text-gray-600"
+                }`}
+              >
+                {COUNTRY_LABELS[c][language]}
+              </button>
+            ))}
 
-          {ALL_THEMES.filter((th) => isFavorite(`theme:${th}`)).map((th) => (
-            <button
-              key={th}
-              onClick={() => {
-                setTheme(th);
-                setCountry("전체");
-                setPage(1);
-              }}
-              className={`rounded-full px-3 py-1 text-sm ${
-                theme === th
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100 text-gray-600"
-              }`}
-            >
-              {THEME_LABELS[th][language]}
-            </button>
-          ))}
+          {!categoriesExpanded &&
+            ALL_THEMES.filter((th) => isFavorite(`theme:${th}`)).map((th) => (
+              <button
+                key={th}
+                onClick={() => {
+                  setTheme(th);
+                  setCountry("전체");
+                  setPage(1);
+                }}
+                className={`rounded-full px-3 py-1 text-sm ${
+                  theme === th
+                    ? "bg-gray-900 text-white"
+                    : "bg-gray-100 text-gray-600"
+                }`}
+              >
+                {THEME_LABELS[th][language]}
+              </button>
+            ))}
 
-          <button
-            onClick={() => setFilterSheetOpen(true)}
-            className="flex items-center gap-1 rounded-full border border-gray-200 px-3 py-1 text-sm text-gray-600"
-          >
-            <IconAdjustments size={14} />
-            {t.filterButton}
-          </button>
+          {categoriesExpanded &&
+            ALL_COUNTRIES.map((c, i) => (
+              <PopChip
+                key={c}
+                label={COUNTRY_LABELS[c][language]}
+                selected={country === c}
+                favorite={isFavorite(`country:${c}`)}
+                visible={chipsVisible}
+                delay={i * 30}
+                onSelect={() => {
+                  setCountry(c);
+                  setTheme("전체");
+                  setPage(1);
+                  setCategoriesExpanded(false);
+                }}
+                onToggleFavorite={() => toggleFavorite(`country:${c}`)}
+              />
+            ))}
+
+          {categoriesExpanded &&
+            ALL_THEMES.map((th, i) => (
+              <PopChip
+                key={th}
+                label={THEME_LABELS[th][language]}
+                selected={theme === th}
+                favorite={isFavorite(`theme:${th}`)}
+                visible={chipsVisible}
+                delay={(ALL_COUNTRIES.length + i) * 30}
+                onSelect={() => {
+                  setTheme(th);
+                  setCountry("전체");
+                  setPage(1);
+                  setCategoriesExpanded(false);
+                }}
+                onToggleFavorite={() => toggleFavorite(`theme:${th}`)}
+              />
+            ))}
         </div>
+        {categoriesExpanded && (
+          <p className="mt-1 text-xs text-gray-400">{t.filterFavoriteHint}</p>
+        )}
 
         {/* 맛 분류 (국가 버튼 아래에 표시) */}
         <div className="mt-2 flex flex-wrap gap-2">
@@ -379,107 +470,6 @@ export default function HomePage() {
           {t.reportCta}
         </Link>
       </main>
-
-      {/* 요리 종류 · 테마 전체 목록을 고르는 바텀시트. 로그인 여부와 상관없이
-          별표(즐겨찾기)를 누르면 바로 위 기본 화면 칩에 추가됩니다.
-          SEED 컴포넌트 문서(seed-design.io/components/bottom-sheet) 스펙을 따름:
-          backdrop = $color.bg.overlay, content topCornerRadius = $radius.r6(24px),
-          enterDuration = $duration.d6(300ms) + $timing-function.enter-expressive,
-          핸들 36x4px 회색, 닫기 버튼 44px 터치영역/28px 원형. */}
-      {filterSheetOpen && (
-        <div
-          className={`fixed inset-0 z-50 flex items-end justify-center bg-[#00000074] transition-opacity duration-300 ease-[cubic-bezier(0,0,0.15,1)] ${
-            filterSheetVisible ? "opacity-100" : "opacity-0"
-          }`}
-          onClick={() => setFilterSheetOpen(false)}
-        >
-          <div
-            className={`w-full max-w-md rounded-t-3xl bg-white px-5 pb-5 pt-1.5 shadow-s3 transition-transform duration-300 ease-[cubic-bezier(0.03,0.4,0.1,1)] ${
-              filterSheetVisible ? "translate-y-0" : "translate-y-full"
-            }`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mx-auto h-1 w-9 rounded-full bg-gray-400" />
-            <div className="mt-4 flex items-center justify-between">
-              <h2 className="text-[1.375rem] font-bold leading-[1.875rem] text-gray-900">
-                {t.filterSheetTitle}
-              </h2>
-              <button
-                onClick={() => setFilterSheetOpen(false)}
-                aria-label={t.close}
-                className="flex h-11 w-11 items-center justify-center"
-              >
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200">
-                  <IconX size={14} className="text-gray-900" />
-                </span>
-              </button>
-            </div>
-            <p className="mt-1 text-xs text-gray-400">{t.filterFavoriteHint}</p>
-
-            <h3 className="mt-4 text-xs font-semibold text-gray-500">
-              {t.filterCountrySection}
-            </h3>
-            <div className="mt-1 divide-y divide-gray-100">
-              {ALL_COUNTRIES.map((c) => (
-                <div key={c} className="flex items-center justify-between py-2">
-                  <button
-                    onClick={() => {
-                      setCountry(c);
-                      setTheme("전체");
-                      setPage(1);
-                      setFilterSheetOpen(false);
-                    }}
-                    className="flex-1 text-left text-sm text-gray-700"
-                  >
-                    {COUNTRY_LABELS[c][language]}
-                  </button>
-                  <button
-                    onClick={() => toggleFavorite(`country:${c}`)}
-                    aria-label="favorite"
-                  >
-                    {isFavorite(`country:${c}`) ? (
-                      <IconStarFilled size={18} className="text-brand-500" />
-                    ) : (
-                      <IconStar size={18} className="text-gray-300" />
-                    )}
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <h3 className="mt-4 text-xs font-semibold text-gray-500">
-              {t.filterThemeSection}
-            </h3>
-            <div className="mt-1 divide-y divide-gray-100">
-              {ALL_THEMES.map((th) => (
-                <div key={th} className="flex items-center justify-between py-2">
-                  <button
-                    onClick={() => {
-                      setTheme(th);
-                      setCountry("전체");
-                      setPage(1);
-                      setFilterSheetOpen(false);
-                    }}
-                    className="flex-1 text-left text-sm text-gray-700"
-                  >
-                    {THEME_LABELS[th][language]}
-                  </button>
-                  <button
-                    onClick={() => toggleFavorite(`theme:${th}`)}
-                    aria-label="favorite"
-                  >
-                    {isFavorite(`theme:${th}`) ? (
-                      <IconStarFilled size={18} className="text-brand-500" />
-                    ) : (
-                      <IconStar size={18} className="text-gray-300" />
-                    )}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
