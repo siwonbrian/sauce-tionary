@@ -102,12 +102,14 @@ export const UI_STRINGS = {
     aboutBody2:
       "레시피는 사용자 제보로 등록돼요. 제보 시 원본 게시물 링크를 반드시 남기고, 운영자가 확인하기 전까지는 \"검증 필요\" 배지가 붙어요. 잘못된 정보나 저작권 문제를 발견하면 언제든 문의해주세요.",
     aboutContactCta: "문의하기 →",
-    filterButton: "카테고리",
+    filterButton: "필터",
     filterSheetTitle: "카테고리 선택",
     filterCountrySection: "요리 종류",
     filterThemeSection: "테마",
+    filterFlavorSection: "맛",
     filterApply: "적용",
     filterFavoriteHint: "별표를 누르면 기본 화면에 바로 보여요.",
+    filterExamplePrefix: "예:",
   },
   en: {
     siteName: "Sauce-tionary",
@@ -187,11 +189,13 @@ export const UI_STRINGS = {
     aboutBody2:
       "Recipes are added through user submissions. Every submission must include a link to the original post, and carries a \"Needs verification\" badge until a moderator reviews it. If you spot incorrect information or a copyright issue, please reach out any time.",
     aboutContactCta: "Contact us →",
-    filterButton: "Categories",
+    filterButton: "Filter",
     filterSheetTitle: "Select categories",
     filterCountrySection: "Cuisine",
     filterThemeSection: "Theme",
+    filterFlavorSection: "Flavor",
     filterApply: "Apply",
     filterFavoriteHint: "Star a category to pin it to the main screen.",
+    filterExamplePrefix: "e.g.",
   },
 } satisfies Record<Language, Record<string, string>>;

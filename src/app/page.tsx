@@ -2,10 +2,9 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { IconSearch, IconChevronDown } from "@tabler/icons-react";
+import { IconSearch, IconChevronDown, IconFilter } from "@tabler/icons-react";
 import RecipeCard from "@/components/RecipeCard";
 import Reveal from "@/components/Reveal";
-import CategoryCarousel from "@/components/CategoryCarousel";
 import {
   mockRecipes,
   type CountryTag,
@@ -14,24 +13,19 @@ import {
 } from "@/lib/mockRecipes";
 import { useLanguage } from "@/lib/LanguageContext";
 import { COUNTRY_LABELS, FLAVOR_LABELS, THEME_LABELS } from "@/lib/i18n";
-import { useFavoriteCategories } from "@/lib/useFavoriteCategories";
-import { ALL_ICON, COUNTRY_ICONS, THEME_ICONS } from "@/lib/categoryIcons";
 
 // 요리 종류(국가별)는 5개로 고정해둡니다. 하이디라오처럼 브랜드·상황 기준 태그는
-// 여기 섞지 않고 ALL_THEMES에 별도로 둬서, 국가 분류가 계속 늘어나지 않게 합니다.
+// 여기 섞지 않고 필터 버튼 안에 별도로 둬서, 상단 탭이 계속 늘어나지 않게 합니다.
 const ALL_COUNTRIES: CountryTag[] = ["한식", "중식", "양식", "일식", "멕시칸"];
 const ALL_THEMES: ThemeTag[] = ["하이디라오"];
 const FLAVORS: (FlavorTag | "전체")[] = ["전체", "매콤", "고소", "짭짤"];
 const SORTS = ["최신순", "인기순", "저장됨"] as const;
 type SortOption = (typeof SORTS)[number];
 
-const PAGE_SIZE = 6;
+// 필터 버튼 옆 요약에 "어떤 순서로 골랐는지"를 보여주기 위한 두 축
+type FilterKind = "theme" | "flavor";
 
-// 레시피 이름에서 "OO 소스"/"OO 스타일 소스" 꼬리를 떼어내 짧은 태그 라벨로 씁니다.
-// 예: "쌈장 스타일 소스" -> "쌈장", "마라 훠궈 소스" -> "마라 훠궈"
-function shortRecipeLabel(name: string): string {
-  return name.replace(/\s*(스타일\s*)?소스$/, "").trim();
-}
+const PAGE_SIZE = 6;
 
 export default function HomePage() {
   const { language, t } = useLanguage();
@@ -39,12 +33,14 @@ export default function HomePage() {
   const [country, setCountry] = useState<CountryTag | "전체">("전체");
   const [theme, setTheme] = useState<ThemeTag | "전체">("전체");
   const [flavor, setFlavor] = useState<(typeof FLAVORS)[number]>("전체");
+  // 테마·맛을 고른 순서를 따로 기록해서, 필터 버튼 옆에 고른 순서 그대로 보여줍니다.
+  const [filterOrder, setFilterOrder] = useState<FilterKind[]>([]);
+  const [filterOpen, setFilterOpen] = useState(false);
   const [sort, setSort] = useState<SortOption>("최신순");
   const [sortOpen, setSortOpen] = useState(false);
   const [savedDesc, setSavedDesc] = useState(true); // 저장됨 그룹 내 높은순/낮은순
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const { isFavorite, toggleFavorite } = useFavoriteCategories();
 
   const toggleSave = (id: string) => {
     setRecipes((prev) =>
@@ -71,8 +67,28 @@ export default function HomePage() {
     setCountry("전체");
     setTheme("전체");
     setFlavor("전체");
+    setFilterOrder([]);
     setSort("최신순");
     setPage(1);
+  };
+
+  // 테마를 고르면 filterOrder 맨 뒤로 보내고(순서 기록), "전체"로 되돌리면 빼줍니다.
+  const selectTheme = (value: ThemeTag | "전체") => {
+    setTheme(value);
+    setPage(1);
+    setFilterOrder((prev) => {
+      const rest = prev.filter((k) => k !== "theme");
+      return value === "전체" ? rest : [...rest, "theme"];
+    });
+  };
+
+  const selectFlavor = (value: (typeof FLAVORS)[number]) => {
+    setFlavor(value);
+    setPage(1);
+    setFilterOrder((prev) => {
+      const rest = prev.filter((k) => k !== "flavor");
+      return value === "전체" ? rest : [...rest, "flavor"];
+    });
   };
 
   // 요리 종류 · 테마 · 맛 · 검색어 필터를 실제로 적용
@@ -127,33 +143,29 @@ export default function HomePage() {
     page * PAGE_SIZE
   );
 
-  // 요리 종류 + 테마를 한 캐러셀에 같이 넣습니다 (국가/테마 구분 없이 "country:한식",
-  // "theme:하이디라오" 처럼 접두어를 붙여 하나의 선택값으로 관리).
-  const categoryActiveKey =
-    country !== "전체"
-      ? `country:${country}`
-      : theme !== "전체"
-        ? `theme:${theme}`
-        : "전체";
+  // 필터 버튼 옆에 보여줄 텍스트: 고른 게 있으면 고른 순서대로, 없으면 예시를 보여줌
+  const activeFilterLabels = filterOrder.map((kind) =>
+    kind === "theme"
+      ? THEME_LABELS[theme as ThemeTag][language]
+      : FLAVOR_LABELS[flavor as FlavorTag][language]
+  );
 
-  // 국가/테마를 선택하면 그 아래에 매콤·고소·짭짤 같은 고정 맛 태그 대신, 그
-  // 카테고리에 실제로 속한 소스들의 이름(짧게 줄인 것)과 테마 태그를 보여줍니다.
-  // "전체" 상태에서는 특정 카테고리 맥락이 없으니 아무것도 안 보여줍니다.
-  const subTags = useMemo(() => {
-    if (country === "전체" && theme === "전체") return [];
-    const matches = recipes.filter((r) => {
-      if (country !== "전체") return r.country === country;
-      return r.theme === theme;
-    });
-    const labels = new Set<string>();
-    matches.forEach((r) => {
-      if (r.theme && !(theme !== "전체" && r.theme === theme)) {
-        labels.add(THEME_LABELS[r.theme][language]);
-      }
-      labels.add(shortRecipeLabel(language === "en" ? r.nameEn : r.name));
-    });
-    return Array.from(labels);
-  }, [recipes, country, theme, language]);
+  const filterExampleHint = useMemo(() => {
+    const themeLabels = ALL_THEMES.map((th) => THEME_LABELS[th][language]);
+    const flavorLabels = FLAVORS.filter((f) => f !== "전체").map(
+      (f) => FLAVOR_LABELS[f as FlavorTag][language]
+    );
+    return [...themeLabels, ...flavorLabels].join(" · ");
+  }, [language]);
+
+  const countryTabs: { key: string; label: string; value: CountryTag | "전체" }[] = [
+    { key: "전체", label: t.all, value: "전체" },
+    ...ALL_COUNTRIES.map((c) => ({
+      key: c,
+      label: COUNTRY_LABELS[c][language],
+      value: c as CountryTag | "전체",
+    })),
+  ];
 
   return (
     <div className="min-h-screen pb-20">
@@ -181,117 +193,136 @@ export default function HomePage() {
       </header>
 
       <main className="mx-auto max-w-md px-4 py-4">
-        {/* A안: 요리 종류 · 테마만 캐러셀로 (맛/정렬은 기존처럼 따로 유지) */}
-        <CategoryCarousel
-          allItem={{ key: "전체", emoji: ALL_ICON, label: t.all }}
-          items={[
-            ...ALL_COUNTRIES.map((c) => ({
-              key: `country:${c}`,
-              emoji: COUNTRY_ICONS[c],
-              label: COUNTRY_LABELS[c][language],
-            })),
-            ...ALL_THEMES.map((th) => ({
-              key: `theme:${th}`,
-              emoji: THEME_ICONS[th],
-              label: THEME_LABELS[th][language],
-            })),
-          ]}
-          activeKey={categoryActiveKey}
-          isFavorite={isFavorite}
-          onToggleFavorite={toggleFavorite}
-          onSelect={(key) => {
-            if (key === "전체") {
-              setCountry("전체");
-              setTheme("전체");
-            } else if (key.startsWith("country:")) {
-              setCountry(key.slice("country:".length) as CountryTag);
-              setTheme("전체");
-            } else if (key.startsWith("theme:")) {
-              setTheme(key.slice("theme:".length) as ThemeTag);
-              setCountry("전체");
-            }
-            setPage(1);
-          }}
-          favoriteHint={t.filterFavoriteHint}
-        />
-
-        {/* 국가/테마를 고르면 그 카테고리에 속한 소스 이름·테마를 태그로 보여줌.
-            누르면 검색어로 적용되어 목록이 그 소스로 좁혀짐. */}
-        {subTags.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {subTags.map((tag) => (
+        {/* 요리 종류 탭: 검색창 바로 밑, 텍스트 + 밑줄 방식 (아이콘/테마 없이 나라만) */}
+        <div className="flex gap-5 overflow-x-auto border-b border-gray-100 no-scrollbar">
+          {countryTabs.map((tab) => {
+            const active = country === tab.value;
+            return (
               <button
-                key={tag}
+                key={tab.key}
                 onClick={() => {
-                  setSearchTerm((prev) => (prev === tag ? "" : tag));
+                  setCountry(tab.value);
                   setPage(1);
                 }}
-                className={`rounded-full px-3 py-1 text-xs ${
-                  searchTerm === tag
-                    ? "bg-gray-900 text-white"
-                    : "bg-gray-100 text-gray-600"
+                className={`relative flex-shrink-0 pb-2 text-sm transition-colors ${
+                  active ? "font-semibold text-gray-900" : "text-gray-400"
                 }`}
               >
-                #{tag}
+                {tab.label}
+                {active && (
+                  <span className="absolute -bottom-px left-0 h-0.5 w-full rounded-full bg-brand-500" />
+                )}
               </button>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
 
-        {/* 맛 분류(독립 토글) + 정렬 드롭다운을 한 줄에 */}
-        <div className="relative mt-3 flex items-center justify-between gap-2">
-          <div className="flex flex-wrap gap-2">
-            {FLAVORS.map((f) => (
-              <button
-                key={f}
-                onClick={() => {
-                  setFlavor(f);
-                  setPage(1);
-                }}
-                className={`rounded-full px-3 py-1 text-sm ${
-                  flavor === f
-                    ? "bg-brand-500 text-white"
-                    : "bg-gray-100 text-gray-600"
-                }`}
-              >
-                {f === "전체" ? t.all : FLAVOR_LABELS[f][language]}
-              </button>
-            ))}
+        {/* 필터 버튼: 탭 밑에 배치, 눌러서 테마·맛 선택. 옆에는 고른 순서대로 요약 표시,
+            아무것도 안 골랐으면 예시를 회색으로 보여줌. */}
+        <div className="relative mt-3 flex items-center gap-2">
+          <button
+            onClick={() => setFilterOpen((v) => !v)}
+            className="flex flex-shrink-0 items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600"
+          >
+            <IconFilter size={14} />
+            {t.filterButton}
+          </button>
+          <div className="flex-1 truncate text-xs">
+            {activeFilterLabels.length > 0 ? (
+              <span className="text-gray-700">{activeFilterLabels.join(", ")}</span>
+            ) : (
+              <span className="text-gray-300">
+                {t.filterExamplePrefix} {filterExampleHint}
+              </span>
+            )}
           </div>
 
-          <div className="relative flex-shrink-0">
-            <button
-              onClick={() => setSortOpen((v) => !v)}
-              className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600"
-            >
-              {sort === "최신순" ? t.sortNewest : sort === "인기순" ? t.sortPopular : t.sortSaved}
-              <IconChevronDown size={14} />
-            </button>
-            {sortOpen && (
-              <div className="absolute right-0 top-9 z-10 w-28 rounded-lg border border-gray-200 bg-white py-1 shadow-s2">
-                {SORTS.map((s) => (
+          {filterOpen && (
+            <div className="absolute left-0 top-10 z-10 w-64 rounded-lg border border-gray-200 bg-white p-3 shadow-s2">
+              <p className="mb-1.5 text-xs font-semibold text-gray-400">
+                {t.filterThemeSection}
+              </p>
+              <div className="mb-3 flex flex-wrap gap-2">
+                <button
+                  onClick={() => selectTheme("전체")}
+                  className={`rounded-full px-3 py-1 text-sm ${
+                    theme === "전체"
+                      ? "bg-brand-500 text-white"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  {t.all}
+                </button>
+                {ALL_THEMES.map((th) => (
                   <button
-                    key={s}
-                    onClick={() => {
-                      setSort(s);
-                      setSortOpen(false);
-                      setPage(1);
-                    }}
-                    className={`block w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 ${
-                      sort === s ? "font-semibold text-brand-600" : "text-gray-600"
+                    key={th}
+                    onClick={() => selectTheme(theme === th ? "전체" : th)}
+                    className={`rounded-full px-3 py-1 text-sm ${
+                      theme === th
+                        ? "bg-brand-500 text-white"
+                        : "bg-gray-100 text-gray-600"
                     }`}
                   >
-                    {s === "최신순" ? t.sortNewest : s === "인기순" ? t.sortPopular : t.sortSaved}
+                    {THEME_LABELS[th][language]}
                   </button>
                 ))}
               </div>
-            )}
-          </div>
+
+              <p className="mb-1.5 text-xs font-semibold text-gray-400">
+                {t.filterFlavorSection}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {FLAVORS.map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => selectFlavor(f === "전체" ? "전체" : flavor === f ? "전체" : f)}
+                    className={`rounded-full px-3 py-1 text-sm ${
+                      flavor === f
+                        ? "bg-brand-500 text-white"
+                        : "bg-gray-100 text-gray-600"
+                    }`}
+                  >
+                    {f === "전체" ? t.all : FLAVOR_LABELS[f][language]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 정렬: 필터와 별개로, 항상 레시피 목록 바로 위 오른쪽에 고정 */}
+        <div className="relative mt-4 flex items-center justify-end">
+          <button
+            onClick={() => setSortOpen((v) => !v)}
+            className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600"
+          >
+            {sort === "최신순" ? t.sortNewest : sort === "인기순" ? t.sortPopular : t.sortSaved}
+            <IconChevronDown size={14} />
+          </button>
+          {sortOpen && (
+            <div className="absolute right-0 top-9 z-10 w-28 rounded-lg border border-gray-200 bg-white py-1 shadow-s2">
+              {SORTS.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => {
+                    setSort(s);
+                    setSortOpen(false);
+                    setPage(1);
+                  }}
+                  className={`block w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 ${
+                    sort === s ? "font-semibold text-brand-600" : "text-gray-600"
+                  }`}
+                >
+                  {s === "최신순" ? t.sortNewest : s === "인기순" ? t.sortPopular : t.sortSaved}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* 저장됨: 맛 분류별로 그룹핑 + 그룹 내 높은순/낮은순 */}
         {sort === "저장됨" && savedGrouped && (
-          <div className="mt-4 space-y-6">
+          <div className="mt-3 space-y-6">
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setSavedDesc(true)}
@@ -341,7 +372,7 @@ export default function HomePage() {
         {/* 최신순 / 인기순: 일반 그리드 + 페이지네이션 */}
         {sort !== "저장됨" && (
           <>
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {pagedList.map((r, i) => (
                 <Reveal key={r.id} delay={i * 40}>
                   <RecipeCard
