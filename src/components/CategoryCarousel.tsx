@@ -117,7 +117,17 @@ export default function CategoryCarousel({
 
         <div
           ref={scrollRef}
-          className="no-scrollbar flex flex-1 gap-3 overflow-x-auto scroll-smooth px-1 py-1"
+          // 가로 스크롤 도중 아이콘 동그라미가 컨테이너 경계에서 반으로 잘려 보이는
+          // 문제를 CSS mask-image로 완화합니다. 실제로 잘리는 건 막을 수 없지만,
+          // 가장자리로 갈수록 투명해지게 해서 뚝 끊기지 않고 자연스럽게 이어지는
+          // 느낌을 줍니다.
+          style={{
+            maskImage:
+              "linear-gradient(to right, transparent 0, black 20px, black calc(100% - 20px), transparent 100%)",
+            WebkitMaskImage:
+              "linear-gradient(to right, transparent 0, black 20px, black calc(100% - 20px), transparent 100%)",
+          }}
+          className="no-scrollbar flex flex-1 gap-3 overflow-x-auto scroll-smooth px-3 py-1"
         >
           {renderCard(allItem, activeKey === allItem.key, false)}
           {carouselItems.map((item) => renderCard(item, activeKey === item.key, true))}

@@ -27,6 +27,12 @@ type SortOption = (typeof SORTS)[number];
 
 const PAGE_SIZE = 6;
 
+// 레시피 이름에서 "OO 소스"/"OO 스타일 소스" 꼬리를 떼어내 짧은 태그 라벨로 씁니다.
+// 예: "쌈장 스타일 소스" -> "쌈장", "마라 훠궈 소스" -> "마라 훠궈"
+function shortRecipeLabel(name: string): string {
+  return name.replace(/\s*(스타일\s*)?소스$/, "").trim();
+}
+
 export default function HomePage() {
   const { language, t } = useLanguage();
   const [recipes, setRecipes] = useState(mockRecipes);
@@ -130,6 +136,25 @@ export default function HomePage() {
         ? `theme:${theme}`
         : "전체";
 
+  // 국가/테마를 선택하면 그 아래에 매콤·고소·짭짤 같은 고정 맛 태그 대신, 그
+  // 카테고리에 실제로 속한 소스들의 이름(짧게 줄인 것)과 테마 태그를 보여줍니다.
+  // "전체" 상태에서는 특정 카테고리 맥락이 없으니 아무것도 안 보여줍니다.
+  const subTags = useMemo(() => {
+    if (country === "전체" && theme === "전체") return [];
+    const matches = recipes.filter((r) => {
+      if (country !== "전체") return r.country === country;
+      return r.theme === theme;
+    });
+    const labels = new Set<string>();
+    matches.forEach((r) => {
+      if (r.theme && !(theme !== "전체" && r.theme === theme)) {
+        labels.add(THEME_LABELS[r.theme][language]);
+      }
+      labels.add(shortRecipeLabel(language === "en" ? r.nameEn : r.name));
+    });
+    return Array.from(labels);
+  }, [recipes, country, theme, language]);
+
   return (
     <div className="min-h-screen pb-20">
       <header className="sticky top-0 z-10 border-b border-gray-100 bg-white px-4 py-3">
@@ -190,54 +215,78 @@ export default function HomePage() {
           favoriteHint={t.filterFavoriteHint}
         />
 
-        {/* 맛 분류 */}
-        <div className="mt-3 flex flex-wrap gap-2">
-          {FLAVORS.map((f) => (
-            <button
-              key={f}
-              onClick={() => {
-                setFlavor(f);
-                setPage(1);
-              }}
-              className={`rounded-full px-3 py-1 text-sm ${
-                flavor === f
-                  ? "bg-brand-500 text-white"
-                  : "bg-gray-100 text-gray-600"
-              }`}
-            >
-              {f === "전체" ? t.all : FLAVOR_LABELS[f][language]}
-            </button>
-          ))}
-        </div>
+        {/* 국가/테마를 고르면 그 카테고리에 속한 소스 이름·테마를 태그로 보여줌.
+            누르면 검색어로 적용되어 목록이 그 소스로 좁혀짐. */}
+        {subTags.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {subTags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => {
+                  setSearchTerm((prev) => (prev === tag ? "" : tag));
+                  setPage(1);
+                }}
+                className={`rounded-full px-3 py-1 text-xs ${
+                  searchTerm === tag
+                    ? "bg-gray-900 text-white"
+                    : "bg-gray-100 text-gray-600"
+                }`}
+              >
+                #{tag}
+              </button>
+            ))}
+          </div>
+        )}
 
-        {/* 정렬 드롭다운 */}
-        <div className="relative mt-3 flex justify-end">
-          <button
-            onClick={() => setSortOpen((v) => !v)}
-            className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600"
-          >
-            {sort === "최신순" ? t.sortNewest : sort === "인기순" ? t.sortPopular : t.sortSaved}
-            <IconChevronDown size={14} />
-          </button>
-          {sortOpen && (
-            <div className="absolute right-0 top-9 z-10 w-28 rounded-lg border border-gray-200 bg-white py-1 shadow-s2">
-              {SORTS.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => {
-                    setSort(s);
-                    setSortOpen(false);
-                    setPage(1);
-                  }}
-                  className={`block w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 ${
-                    sort === s ? "font-semibold text-brand-600" : "text-gray-600"
-                  }`}
-                >
-                  {s === "최신순" ? t.sortNewest : s === "인기순" ? t.sortPopular : t.sortSaved}
-                </button>
-              ))}
-            </div>
-          )}
+        {/* 맛 분류(독립 토글) + 정렬 드롭다운을 한 줄에 */}
+        <div className="relative mt-3 flex items-center justify-between gap-2">
+          <div className="flex flex-wrap gap-2">
+            {FLAVORS.map((f) => (
+              <button
+                key={f}
+                onClick={() => {
+                  setFlavor(f);
+                  setPage(1);
+                }}
+                className={`rounded-full px-3 py-1 text-sm ${
+                  flavor === f
+                    ? "bg-brand-500 text-white"
+                    : "bg-gray-100 text-gray-600"
+                }`}
+              >
+                {f === "전체" ? t.all : FLAVOR_LABELS[f][language]}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative flex-shrink-0">
+            <button
+              onClick={() => setSortOpen((v) => !v)}
+              className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600"
+            >
+              {sort === "최신순" ? t.sortNewest : sort === "인기순" ? t.sortPopular : t.sortSaved}
+              <IconChevronDown size={14} />
+            </button>
+            {sortOpen && (
+              <div className="absolute right-0 top-9 z-10 w-28 rounded-lg border border-gray-200 bg-white py-1 shadow-s2">
+                {SORTS.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => {
+                      setSort(s);
+                      setSortOpen(false);
+                      setPage(1);
+                    }}
+                    className={`block w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 ${
+                      sort === s ? "font-semibold text-brand-600" : "text-gray-600"
+                    }`}
+                  >
+                    {s === "최신순" ? t.sortNewest : s === "인기순" ? t.sortPopular : t.sortSaved}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* 저장됨: 맛 분류별로 그룹핑 + 그룹 내 높은순/낮은순 */}
