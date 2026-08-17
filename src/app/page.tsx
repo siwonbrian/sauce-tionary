@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { IconSearch, IconChevronDown, IconFilter } from "@tabler/icons-react";
 import RecipeCard from "@/components/RecipeCard";
@@ -43,6 +43,24 @@ export default function HomePage() {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const { getViewCount } = useViewCounts();
+
+  // 필터/정렬 드롭다운이 열려 있을 때, 그 영역 바깥을 클릭하면 자동으로 닫히게 함
+  const filterAreaRef = useRef<HTMLDivElement>(null);
+  const sortAreaRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!filterOpen && !sortOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (filterOpen && filterAreaRef.current && !filterAreaRef.current.contains(target)) {
+        setFilterOpen(false);
+      }
+      if (sortOpen && sortAreaRef.current && !sortAreaRef.current.contains(target)) {
+        setSortOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [filterOpen, sortOpen]);
 
   // 정렬 버튼/드롭다운에 보여줄 라벨 (최신순/인기순/많이 본/저장됨)
   const sortLabel = (s: SortOption) =>
@@ -235,7 +253,7 @@ export default function HomePage() {
 
         {/* 필터 버튼: 탭 밑에 배치, 눌러서 테마·맛 선택. 옆에는 고른 순서대로 요약 표시,
             아무것도 안 골랐으면 예시를 회색으로 보여줌. */}
-        <div className="relative mt-3 flex items-center gap-2">
+        <div ref={filterAreaRef} className="relative mt-3 flex items-center gap-2">
           <button
             onClick={() => setFilterOpen((v) => !v)}
             className="flex flex-shrink-0 items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600"
@@ -307,7 +325,7 @@ export default function HomePage() {
         </div>
 
         {/* 정렬: 필터와 별개로, 항상 레시피 목록 바로 위 오른쪽에 고정 */}
-        <div className="relative mt-4 flex items-center justify-end">
+        <div ref={sortAreaRef} className="relative mt-4 flex items-center justify-end">
           <button
             onClick={() => setSortOpen((v) => !v)}
             className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600"

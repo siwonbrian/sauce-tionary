@@ -11,14 +11,12 @@ import {
   IconHeart,
   IconHeartFilled,
   IconShare,
-  IconExternalLink,
   IconPhoto,
 } from "@tabler/icons-react";
 import { mockRecipes } from "@/lib/mockRecipes";
-import { subjectParticle } from "@/lib/korean";
 import { formatIngredientAmount, type UnitSystem } from "@/lib/units";
 import { useLanguage } from "@/lib/LanguageContext";
-import { COUNTRY_LABELS, FLAVOR_LABELS } from "@/lib/i18n";
+import { COUNTRY_LABELS, FLAVOR_LABELS, THEME_LABELS } from "@/lib/i18n";
 import { loggedIn } from "@/lib/auth";
 import { useViewCounts } from "@/lib/useViewCounts";
 
@@ -97,29 +95,16 @@ export default function RecipeDetailPage() {
         </div>
 
         <div className="mt-4 flex items-start justify-between gap-2">
-          <h1 className="text-xl font-bold text-gray-900">
-            {recipe.celebrityName && celebrityLabel ? (
-              language === "en" ? (
-                <>
-                  <span className="text-brand-600">{celebrityLabel}</span>
-                  <span className="text-gray-900">&rsquo;s </span>
-                  {recipe.nameEn}
-                </>
-              ) : (
-                <>
-                  <span className="text-brand-600">{recipe.celebrityName}</span>
-                  <span className="text-gray-500">
-                    {subjectParticle(recipe.celebrityName)} 소개한{" "}
-                  </span>
-                  {recipe.name}
-                </>
-              )
-            ) : language === "en" ? (
-              recipe.nameEn
-            ) : (
-              recipe.name
+          <div className="flex flex-1 items-start justify-between gap-2">
+            <h1 className="text-xl font-bold text-gray-900">
+              {language === "en" ? recipe.nameEn : recipe.name}
+            </h1>
+            {recipe.spiceLevel > 0 && (
+              <span className="mt-0.5 shrink-0 text-sm">
+                {"🌶️".repeat(recipe.spiceLevel)}
+              </span>
             )}
-          </h1>
+          </div>
           <button
             onClick={() => setSaved((v) => !v)}
             aria-label="저장"
@@ -136,8 +121,15 @@ export default function RecipeDetailPage() {
           <span className="text-xs rounded-full bg-gray-100 px-2 py-0.5 text-gray-600">
             #{FLAVOR_LABELS[recipe.flavor][language]}
           </span>
-          {recipe.spiceLevel > 0 && (
-            <span className="text-xs">{"🌶️".repeat(recipe.spiceLevel)}</span>
+          {recipe.theme === "하이디라오" && (
+            <span className="text-xs rounded-full bg-gray-100 px-2 py-0.5 text-gray-600">
+              #{THEME_LABELS[recipe.theme][language]}
+            </span>
+          )}
+          {recipe.celebrityName && (
+            <span className="text-xs rounded-full bg-brand-100 px-2 py-0.5 text-brand-700">
+              #{celebrityLabel ?? recipe.celebrityName}
+            </span>
           )}
         </div>
 
@@ -204,15 +196,9 @@ export default function RecipeDetailPage() {
           {language === "en" ? recipe.instructionsEn : recipe.instructions}
         </p>
 
-        <a
-          href={recipe.sourceUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-4 flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600"
-        >
-          <IconExternalLink size={14} />
+        <p className="mt-4 text-xs text-gray-400">
           {t.source}: {language === "en" ? recipe.sourceNameEn : recipe.sourceName}
-        </a>
+        </p>
 
         {/* 개인 레시피 노트 (비공개, 본인만 확인). 로그인 전에는 입력을 막고
             로그인 유도 문구 + 버튼만 보여줌 */}

@@ -33,7 +33,7 @@ export interface MockRecipe {
   flavor: FlavorTag;
   country: CountryTag;
   theme?: ThemeTag; // 국가 분류와 별개인 브랜드·상황 태그 (예: 하이디라오 소스바류)
-  celebrityName?: string; // 예: "건희" -> 제목에 "건희가 소개한 ~"로 표시 + #건희 해시태그(검색용) 병행
+  celebrityName?: string; // 예: "건희" -> 제목은 소스 이름 그대로 표시하고, #건희 해시태그(검색용)로만 병행
   celebrityNameEn?: string; // 영어 화면용 로마자 표기 (예: "Geonhui")
   spiceLevel: number; // 0(순함) ~ 3(제일 매움). 벤치마킹(saucepick.com) 후 추가
   photoUrl?: string; // 완성 사진(공개용). 아직 실제 업로드 기능 전이라 목데이터에는 없음 -> 빈 값이면 사진 자리에 아이콘만 표시
@@ -311,8 +311,8 @@ export const mockRecipes: MockRecipe[] = [
   {
     id: "9",
     slug: "sesame-peanut-hotpot-sauce-official",
-    name: "참깨땅콩 훠궈 소스 (하이디라오 공식)",
-    nameEn: "Sesame Peanut Hotpot Sauce (Haidilao Official)",
+    name: "참깨땅콩 훠궈 소스",
+    nameEn: "Sesame Peanut Hotpot Sauce",
     flavor: "고소",
     country: "중식",
     theme: "하이디라오",
@@ -339,8 +339,8 @@ export const mockRecipes: MockRecipe[] = [
   {
     id: "10",
     slug: "hotpot-chili-sauce-official",
-    name: "훠궈 칠리 소스 (하이디라오 공식)",
-    nameEn: "Hotpot Chili Sauce (Haidilao Official)",
+    name: "훠궈 칠리 소스",
+    nameEn: "Hotpot Chili Sauce",
     flavor: "매콤",
     country: "중식",
     theme: "하이디라오",
@@ -367,8 +367,8 @@ export const mockRecipes: MockRecipe[] = [
   {
     id: "11",
     slug: "meatball-soy-sauce-official",
-    name: "완자 간장 소스 (하이디라오 공식)",
-    nameEn: "Meatball Soy Sauce (Haidilao Official)",
+    name: "완자 간장 소스",
+    nameEn: "Meatball Soy Sauce",
     flavor: "짭짤",
     country: "중식",
     theme: "하이디라오",
@@ -396,8 +396,8 @@ export const mockRecipes: MockRecipe[] = [
   {
     id: "12",
     slug: "sesame-oil-garlic-sauce-official",
-    name: "참기름 마늘 소스 (하이디라오 공식)",
-    nameEn: "Sesame Oil Garlic Sauce (Haidilao Official)",
+    name: "참기름 마늘 소스",
+    nameEn: "Sesame Oil Garlic Sauce",
     flavor: "고소",
     country: "중식",
     theme: "하이디라오",
@@ -422,8 +422,8 @@ export const mockRecipes: MockRecipe[] = [
   {
     id: "13",
     slug: "mushroom-beef-hotpot-sauce-official",
-    name: "버섯소고기 훠궈 소스 (하이디라오 공식)",
-    nameEn: "Mushroom Beef Hotpot Sauce (Haidilao Official)",
+    name: "버섯소고기 훠궈 소스",
+    nameEn: "Mushroom Beef Hotpot Sauce",
     flavor: "짭짤",
     country: "중식",
     theme: "하이디라오",
@@ -448,8 +448,8 @@ export const mockRecipes: MockRecipe[] = [
   {
     id: "14",
     slug: "sacha-seafood-sauce-official",
-    name: "사차장 해산물 소스 (하이디라오 공식)",
-    nameEn: "Sha Cha Seafood Sauce (Haidilao Official)",
+    name: "사차장 해산물 소스",
+    nameEn: "Sha Cha Seafood Sauce",
     flavor: "짭짤",
     country: "중식",
     theme: "하이디라오",
@@ -476,8 +476,8 @@ export const mockRecipes: MockRecipe[] = [
   {
     id: "15",
     slug: "staff-secret-hotpot-sauce-official",
-    name: "직원 비법 훠궈 소스 (하이디라오 공식)",
-    nameEn: "Staff Secret Hotpot Sauce (Haidilao Official)",
+    name: "직원 비법 훠궈 소스",
+    nameEn: "Staff Secret Hotpot Sauce",
     flavor: "매콤",
     country: "중식",
     theme: "하이디라오",
@@ -672,8 +672,8 @@ export const mockRecipes: MockRecipe[] = [
   {
     id: "21",
     slug: "premium-kb-sauce-spicy",
-    name: "프리미엄 KB 소스 (매운맛)",
-    nameEn: "Premium KB Sauce (Spicy)",
+    name: "프리미엄 KB 소스 2",
+    nameEn: "Premium KB Sauce 2",
     flavor: "매콤",
     country: "중식",
     theme: "하이디라오",
@@ -702,8 +702,8 @@ export const mockRecipes: MockRecipe[] = [
   {
     id: "22",
     slug: "geonhui-bubble-sauce",
-    name: "땅콩칠리 훠궈 소스 (버블 공개 원본)",
-    nameEn: "Peanut Chili Hotpot Sauce (Original Bubble Post)",
+    name: "건희 소스 2",
+    nameEn: "Geonhui Sauce 2",
     flavor: "매콤",
     country: "중식",
     theme: "하이디라오",
@@ -1304,8 +1304,8 @@ export const mockRecipes: MockRecipe[] = [
   {
     id: "42",
     slug: "yuqi-weibo-sauce",
-    name: "땅콩식초고수 훠궈 소스 (웨이보 공개 버전)",
-    nameEn: "Peanut Vinegar Cilantro Hotpot Sauce (Weibo Version)",
+    name: "땅콩식초고수 훠궈 소스",
+    nameEn: "Peanut Vinegar Cilantro Hotpot Sauce",
     flavor: "짭짤",
     country: "중식",
     theme: "하이디라오",
@@ -2093,8 +2093,8 @@ export const mockRecipes: MockRecipe[] = [
   {
     id: "67",
     slug: "apricot-hotpot-sauce-1",
-    name: "스위트칠리매운소고기 훠궈 소스 (살구 1)",
-    nameEn: "Sweet Chili Spicy Beef Hotpot Sauce (Apricot 1)",
+    name: "스위트칠리매운소고기 훠궈 소스",
+    nameEn: "Sweet Chili Spicy Beef Hotpot Sauce",
     flavor: "매콤",
     country: "중식",
     theme: "하이디라오",
@@ -2126,8 +2126,8 @@ export const mockRecipes: MockRecipe[] = [
   {
     id: "68",
     slug: "apricot-hotpot-sauce-2",
-    name: "참깨고추기름 훠궈 소스 (살구 2)",
-    nameEn: "Sesame Chili Oil Hotpot Sauce (Apricot 2)",
+    name: "참깨고추기름 훠궈 소스",
+    nameEn: "Sesame Chili Oil Hotpot Sauce",
     flavor: "매콤",
     country: "중식",
     theme: "하이디라오",
@@ -2158,8 +2158,8 @@ export const mockRecipes: MockRecipe[] = [
   {
     id: "69",
     slug: "sunday-hotpot-sauce-2",
-    name: "매운소고기땅콩 훠궈 소스 (쑨디 2호)",
-    nameEn: "Spicy Beef Peanut Hotpot Sauce (Sunday 2)",
+    name: "매운소고기땅콩 훠궈 소스",
+    nameEn: "Spicy Beef Peanut Hotpot Sauce",
     flavor: "매콤",
     country: "중식",
     theme: "하이디라오",
@@ -2433,8 +2433,8 @@ export const mockRecipes: MockRecipe[] = [
   {
     id: "78",
     slug: "kibum-red-broth-sauce",
-    name: "땅콩참깨오향우육 훠궈 소스 (홍탕용)",
-    nameEn: "Peanut Sesame Five-Spice Beef Hotpot Sauce (Red Broth)",
+    name: "땅콩참깨오향우육 훠궈 소스",
+    nameEn: "Peanut Sesame Five-Spice Beef Hotpot Sauce",
     flavor: "고소",
     country: "중식",
     theme: "하이디라오",
@@ -2462,8 +2462,8 @@ export const mockRecipes: MockRecipe[] = [
   {
     id: "79",
     slug: "kibum-white-broth-sauce",
-    name: "스위트칠리간장 훠궈 소스 (백탕용)",
-    nameEn: "Sweet Chili Soy Hotpot Sauce (White Broth)",
+    name: "스위트칠리간장 훠궈 소스",
+    nameEn: "Sweet Chili Soy Hotpot Sauce",
     flavor: "매콤",
     country: "중식",
     theme: "하이디라오",
@@ -2495,8 +2495,8 @@ export const mockRecipes: MockRecipe[] = [
   {
     id: "80",
     slug: "geonhui-hotpot-sauce-3",
-    name: "소금참기름 훠궈 소스 (건희 3)",
-    nameEn: "Salt Sesame Oil Hotpot Sauce (Geonhui 3)",
+    name: "소금참기름 훠궈 소스",
+    nameEn: "Salt Sesame Oil Hotpot Sauce",
     flavor: "고소",
     country: "중식",
     theme: "하이디라오",

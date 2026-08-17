@@ -10,9 +10,8 @@ import {
   IconPhoto,
 } from "@tabler/icons-react";
 import type { MockRecipe } from "@/lib/mockRecipes";
-import { subjectParticle } from "@/lib/korean";
 import { useLanguage } from "@/lib/LanguageContext";
-import { COUNTRY_LABELS, FLAVOR_LABELS } from "@/lib/i18n";
+import { COUNTRY_LABELS, FLAVOR_LABELS, THEME_LABELS } from "@/lib/i18n";
 
 export default function RecipeCard({
   recipe,
@@ -63,29 +62,16 @@ export default function RecipeCard({
         </div>
 
         <div className="p-4 pr-8">
-        <h3 className="font-semibold text-gray-900">
-          {recipe.celebrityName && celebrityLabel ? (
-            language === "en" ? (
-              <>
-                <span className="text-brand-600">{celebrityLabel}</span>
-                <span className="text-gray-900">&rsquo;s </span>
-                {recipe.nameEn}
-              </>
-            ) : (
-              <>
-                <span className="text-brand-600">{recipe.celebrityName}</span>
-                <span className="text-gray-500">
-                  {subjectParticle(recipe.celebrityName)} 소개한{" "}
-                </span>
-                {recipe.name}
-              </>
-            )
-          ) : language === "en" ? (
-            recipe.nameEn
-          ) : (
-            recipe.name
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="font-semibold text-gray-900">
+            {language === "en" ? recipe.nameEn : recipe.name}
+          </h3>
+          {recipe.spiceLevel > 0 && (
+            <span className="shrink-0 text-xs">
+              {"🌶️".repeat(recipe.spiceLevel)}
+            </span>
           )}
-        </h3>
+        </div>
 
         <div className="mt-2 flex flex-wrap gap-1.5">
           <span className="text-xs rounded-full bg-gray-100 px-2 py-0.5 text-gray-600">
@@ -94,8 +80,10 @@ export default function RecipeCard({
           <span className="text-xs rounded-full bg-gray-100 px-2 py-0.5 text-gray-600">
             #{FLAVOR_LABELS[recipe.flavor][language]}
           </span>
-          {recipe.spiceLevel > 0 && (
-            <span className="text-xs">{"🌶️".repeat(recipe.spiceLevel)}</span>
+          {recipe.theme === "하이디라오" && (
+            <span className="text-xs rounded-full bg-gray-100 px-2 py-0.5 text-gray-600">
+              #{THEME_LABELS[recipe.theme][language]}
+            </span>
           )}
           {recipe.celebrityName && (
             <span className="text-xs rounded-full bg-brand-100 px-2 py-0.5 text-brand-700">
