@@ -13,13 +13,14 @@ import {
 } from "@/lib/mockRecipes";
 import { useLanguage } from "@/lib/LanguageContext";
 import { COUNTRY_LABELS, FLAVOR_LABELS, THEME_LABELS } from "@/lib/i18n";
+import { useViewCounts } from "@/lib/useViewCounts";
 
 // 요리 종류(국가별)는 5개로 고정해둡니다. 하이디라오처럼 브랜드·상황 기준 태그는
 // 여기 섞지 않고 필터 버튼 안에 별도로 둬서, 상단 탭이 계속 늘어나지 않게 합니다.
 const ALL_COUNTRIES: CountryTag[] = ["한식", "중식", "양식", "일식", "멕시칸"];
 const ALL_THEMES: ThemeTag[] = ["하이디라오"];
 const FLAVORS: (FlavorTag | "전체")[] = ["전체", "매콤", "고소", "짭짤"];
-const SORTS = ["최신순", "인기순", "저장됨"] as const;
+const SORTS = ["최신순", "인기순", "많이 본", "저장됨"] as const;
 type SortOption = (typeof SORTS)[number];
 
 // 필터 버튼 옆 요약에 "어떤 순서로 골랐는지"를 보여주기 위한 두 축
@@ -41,6 +42,17 @@ export default function HomePage() {
   const [savedDesc, setSavedDesc] = useState(true); // 저장됨 그룹 내 높은순/낮은순
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const { getViewCount } = useViewCounts();
+
+  // 정렬 버튼/드롭다운에 보여줄 라벨 (최신순/인기순/많이 본/저장됨)
+  const sortLabel = (s: SortOption) =>
+    s === "최신순"
+      ? t.sortNewest
+      : s === "인기순"
+        ? t.sortPopular
+        : s === "많이 본"
+          ? t.sortMostViewed
+          : t.sortSaved;
 
   const toggleSave = (id: string) => {
     setRecipes((prev) =>
@@ -129,13 +141,17 @@ export default function HomePage() {
     const list = [...filtered];
     if (sort === "인기순") {
       list.sort((a, b) => b.likeCount - a.likeCount);
+    } else if (sort === "많이 본") {
+      list.sort(
+        (a, b) => getViewCount(b.id, b.viewCount) - getViewCount(a.id, a.viewCount)
+      );
     } else {
       list.sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
     }
     return list;
-  }, [filtered, sort]);
+  }, [filtered, sort, getViewCount]);
 
   const totalPages = Math.max(1, Math.ceil(sortedList.length / PAGE_SIZE));
   const pagedList = sortedList.slice(
@@ -296,11 +312,11 @@ export default function HomePage() {
             onClick={() => setSortOpen((v) => !v)}
             className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600"
           >
-            {sort === "최신순" ? t.sortNewest : sort === "인기순" ? t.sortPopular : t.sortSaved}
+            {sortLabel(sort)}
             <IconChevronDown size={14} />
           </button>
           {sortOpen && (
-            <div className="absolute right-0 top-9 z-10 w-28 rounded-lg border border-gray-200 bg-white py-1 shadow-s2">
+            <div className="absolute right-0 top-9 z-10 w-32 rounded-lg border border-gray-200 bg-white py-1 shadow-s2">
               {SORTS.map((s) => (
                 <button
                   key={s}
@@ -313,7 +329,7 @@ export default function HomePage() {
                     sort === s ? "font-semibold text-brand-600" : "text-gray-600"
                   }`}
                 >
-                  {s === "최신순" ? t.sortNewest : s === "인기순" ? t.sortPopular : t.sortSaved}
+                  {sortLabel(s)}
                 </button>
               ))}
             </div>
@@ -358,6 +374,7 @@ export default function HomePage() {
                     <Reveal key={r.id} delay={i * 40}>
                       <RecipeCard
                         recipe={r}
+                        viewCount={getViewCount(r.id, r.viewCount)}
                         onToggleSave={toggleSave}
                         onToggleLike={toggleLike}
                       />
@@ -377,6 +394,7 @@ export default function HomePage() {
                 <Reveal key={r.id} delay={i * 40}>
                   <RecipeCard
                     recipe={r}
+                    viewCount={getViewCount(r.id, r.viewCount)}
                     onToggleSave={toggleSave}
                     onToggleLike={toggleLike}
                   />

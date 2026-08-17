@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   IconBookmark,
   IconBookmarkFilled,
+  IconEye,
   IconHeart,
   IconHeartFilled,
   IconPhoto,
@@ -15,10 +16,14 @@ import { COUNTRY_LABELS, FLAVOR_LABELS } from "@/lib/i18n";
 
 export default function RecipeCard({
   recipe,
+  viewCount,
   onToggleSave,
   onToggleLike,
 }: {
   recipe: MockRecipe;
+  // 목데이터 기준값 + 이 브라우저에서의 조회수를 합친 값. 부모(목록 페이지)에서
+  // useViewCounts 훅으로 계산해서 내려줍니다.
+  viewCount: number;
   onToggleSave: (id: string) => void;
   onToggleLike: (id: string) => void;
 }) {
@@ -101,7 +106,7 @@ export default function RecipeCard({
         </div>
       </Link>
 
-      <div className="mt-auto px-4 pb-4">
+      <div className="mt-auto flex items-center gap-3 px-4 pb-4">
         <button
           onClick={() => onToggleLike(recipe.id)}
           aria-label="좋아요"
@@ -116,6 +121,10 @@ export default function RecipeCard({
           )}
           <span>{recipe.likeCount}</span>
         </button>
+        <span className="mt-3 flex items-center gap-1 text-sm text-gray-400">
+          <IconEye size={16} />
+          <span>{viewCount}</span>
+        </span>
       </div>
     </div>
   );

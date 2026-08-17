@@ -8,11 +8,13 @@ import { useLanguage } from "@/lib/LanguageContext";
 import { loggedIn } from "@/lib/auth";
 import RecipeCard from "@/components/RecipeCard";
 import Reveal from "@/components/Reveal";
+import { useViewCounts } from "@/lib/useViewCounts";
 
 export default function SavedPage() {
   const { t } = useLanguage();
   const [recipes, setRecipes] = useState(mockRecipes);
   const savedRecipes = useMemo(() => recipes.filter((r) => r.saved), [recipes]);
+  const { getViewCount } = useViewCounts();
 
   const toggleSave = (id: string) => {
     setRecipes((prev) =>
@@ -65,7 +67,12 @@ export default function SavedPage() {
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {savedRecipes.map((r, i) => (
               <Reveal key={r.id} delay={i * 40}>
-                <RecipeCard recipe={r} onToggleSave={toggleSave} onToggleLike={toggleLike} />
+                <RecipeCard
+                  recipe={r}
+                  viewCount={getViewCount(r.id, r.viewCount)}
+                  onToggleSave={toggleSave}
+                  onToggleLike={toggleLike}
+                />
               </Reveal>
             ))}
           </div>

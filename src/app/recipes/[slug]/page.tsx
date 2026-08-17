@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   IconArrowLeft,
   IconBookmark,
   IconBookmarkFilled,
+  IconEye,
   IconHeart,
   IconHeartFilled,
   IconShare,
@@ -19,11 +20,13 @@ import { formatIngredientAmount, type UnitSystem } from "@/lib/units";
 import { useLanguage } from "@/lib/LanguageContext";
 import { COUNTRY_LABELS, FLAVOR_LABELS } from "@/lib/i18n";
 import { loggedIn } from "@/lib/auth";
+import { useViewCounts } from "@/lib/useViewCounts";
 
 export default function RecipeDetailPage() {
   const params = useParams<{ slug: string }>();
   const recipe = mockRecipes.find((r) => r.slug === params.slug);
   const { language, t } = useLanguage();
+  const { getViewCount, recordView } = useViewCounts();
 
   // 아직 로그인·Supabase 연동 전이라 이 페이지 안에서만 쓰는 임시 상태입니다.
   // 실제 연동 시 이 부분을 Supabase 쿼리/뮤테이션으로 교체하면 됩니다.
@@ -34,6 +37,15 @@ export default function RecipeDetailPage() {
   const [note, setNote] = useState("");
   const [noteSaved, setNoteSaved] = useState(false);
   const [shareMessage, setShareMessage] = useState("");
+
+  // 상세 페이지 진입 시 조회수 1 증가 (같은 방문에서 중복으로 안 쌓이게 ref로 방지)
+  const hasRecordedView = useRef(false);
+  useEffect(() => {
+    if (!recipe || hasRecordedView.current) return;
+    hasRecordedView.current = true;
+    recordView(recipe.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recipe?.id]);
 
   if (!recipe) {
     return (
@@ -140,6 +152,10 @@ export default function RecipeDetailPage() {
             {liked ? <IconHeartFilled size={18} /> : <IconHeart size={18} />}
             {likeCount}
           </button>
+          <span className="flex items-center gap-1 text-sm text-gray-400">
+            <IconEye size={18} />
+            {getViewCount(recipe.id, recipe.viewCount)}
+          </span>
           <button
             onClick={handleShare}
             className="flex items-center gap-1 text-sm text-gray-500"

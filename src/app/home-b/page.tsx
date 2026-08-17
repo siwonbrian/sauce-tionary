@@ -25,6 +25,7 @@ import { useLanguage } from "@/lib/LanguageContext";
 import { COUNTRY_LABELS, FLAVOR_LABELS, THEME_LABELS } from "@/lib/i18n";
 import { useFavoriteCategories } from "@/lib/useFavoriteCategories";
 import { ALL_ICON, COUNTRY_ICONS, THEME_ICONS, FLAVOR_ICONS } from "@/lib/categoryIcons";
+import { useViewCounts } from "@/lib/useViewCounts";
 
 const ALL_COUNTRIES: CountryTag[] = ["한식", "중식", "양식", "일식", "멕시칸"];
 const ALL_THEMES: ThemeTag[] = ["하이디라오"];
@@ -46,6 +47,7 @@ export default function HomePageVariantB() {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const { isFavorite, toggleFavorite } = useFavoriteCategories();
+  const { getViewCount } = useViewCounts();
 
   const toggleSave = (id: string) => {
     setRecipes((prev) =>
@@ -243,7 +245,12 @@ export default function HomePageVariantB() {
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {items.map((r, i) => (
                     <Reveal key={r.id} delay={i * 40}>
-                      <RecipeCard recipe={r} onToggleSave={toggleSave} onToggleLike={toggleLike} />
+                      <RecipeCard
+                    recipe={r}
+                    viewCount={getViewCount(r.id, r.viewCount)}
+                    onToggleSave={toggleSave}
+                    onToggleLike={toggleLike}
+                  />
                     </Reveal>
                   ))}
                 </div>
@@ -257,7 +264,12 @@ export default function HomePageVariantB() {
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {pagedList.map((r, i) => (
                 <Reveal key={r.id} delay={i * 40}>
-                  <RecipeCard recipe={r} onToggleSave={toggleSave} onToggleLike={toggleLike} />
+                  <RecipeCard
+                    recipe={r}
+                    viewCount={getViewCount(r.id, r.viewCount)}
+                    onToggleSave={toggleSave}
+                    onToggleLike={toggleLike}
+                  />
                 </Reveal>
               ))}
             </div>
